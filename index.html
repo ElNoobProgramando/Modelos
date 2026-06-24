@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel ML — Forest · Neurona · Regresión Lineal</title>
+<meta name="description" content="Dashboard de Machine Learning en el navegador: Random Forest, Red Neuronal y Regresión Lineal. Acepta CSV, Excel y SQLite.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="brand__mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="16" cy="6" r="3" fill="currentColor"/>
+        <circle cx="6" cy="16" r="3" fill="currentColor" opacity="0.55"/>
+        <circle cx="26" cy="16" r="3" fill="currentColor" opacity="0.55"/>
+        <circle cx="16" cy="26" r="3" fill="currentColor" opacity="0.3"/>
+        <path d="M16 9V23M16 9L8 14M16 9L24 14M16 23L8 18M16 23L24 18" stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
+      </svg>
+      <div>
+        <p class="brand__title">Panel&nbsp;ML</p>
+        <p class="brand__sub">datos&nbsp;→&nbsp;modelo&nbsp;→&nbsp;decisión</p>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="Modelos">
+      <p class="nav__label">Modelos</p>
+      <button class="nav__item is-active" data-view="forest" type="button">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v16M10 6L5 10M10 6l5 4M10 11l-4 4M10 11l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Random Forest</span>
+        <span class="nav__tag">árboles</span>
+      </button>
+      <button class="nav__item" data-view="neuron" type="button">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="4" cy="6" r="1.8" stroke="currentColor" stroke-width="1.4"/><circle cx="4" cy="14" r="1.8" stroke="currentColor" stroke-width="1.4"/><circle cx="16" cy="10" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M5.6 6.8L13.8 9.4M5.6 13.2L13.8 10.6" stroke="currentColor" stroke-width="1.2"/></svg>
+        <span>Red Neuronal</span>
+        <span class="nav__tag">perceptrón</span>
+      </button>
+      <button class="nav__item" data-view="linreg" type="button">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="3" cy="16" r="1.5" fill="currentColor" opacity=".6"/><circle cx="7" cy="12" r="1.5" fill="currentColor" opacity=".6"/><circle cx="11" cy="9" r="1.5" fill="currentColor" opacity=".6"/><circle cx="15" cy="5" r="1.5" fill="currentColor" opacity=".6"/><path d="M2 17L18 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Regresión Lineal</span>
+        <span class="nav__tag">lineal</span>
+      </button>
+      <button class="nav__item" data-view="tarea1" type="button">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>Tarea 1 — Profe</span>
+        <span class="nav__tag nav__tag--tarea">inversiones</span>
+      </button>
+    </nav>
+
+    <nav class="nav" aria-label="Datos">
+      <p class="nav__label">Datos</p>
+      <button class="nav__item" data-view="data" type="button">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="4" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="3" y="9" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="3" y="14" width="14" height="3" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+        <span>Conjunto de datos</span>
+        <span class="nav__tag" id="rowCountTag">0 filas</span>
+      </button>
+    </nav>
+
+    <div class="sidebar__footer">
+      <p>Todo corre en tu navegador.<br>Ningún dato sale de tu equipo.</p>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+
+    <!-- ---------- VISTA: DATOS ---------- -->
+    <section class="view is-active" id="view-data" aria-labelledby="data-heading">
+      <header class="view__header">
+        <div>
+          <p class="eyebrow">Paso 1</p>
+          <h1 id="data-heading">Conjunto de datos histórico</h1>
+          <p class="view__desc">Carga tus datos desde CSV, Excel (.xlsx/.xls) o SQLite (.db), o escribe filas a mano. Define qué columna quieres predecir (objetivo). El mismo conjunto alimenta los tres modelos.</p>
+        </div>
+      </header>
+
+      <div class="grid-2">
+        <!-- Carga de archivos -->
+        <div class="panel">
+          <h2 class="panel__title">Subir archivo</h2>
+          <label class="dropzone" id="dropzone" for="fileInput">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V4M12 4L7 9M12 4l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <p><strong>Arrastra o haz clic para cargar</strong></p>
+            <div class="dropzone__formats">
+              <span class="fmt-badge fmt-csv">CSV</span>
+              <span class="fmt-badge fmt-xlsx">XLSX</span>
+              <span class="fmt-badge fmt-xls">XLS</span>
+              <span class="fmt-badge fmt-db">SQLite .db</span>
+            </div>
+            <p class="dropzone__hint">CSV: primera fila = nombres de columna</p>
+            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.db,.sqlite,.sqlite3" hidden>
+          </label>
+
+          <!-- Selector de hoja Excel (oculto hasta cargar Excel) -->
+          <div id="sheetSelectorWrap" class="selector-wrap" hidden>
+            <label class="field">
+              <span style="font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.5px;">Hoja de Excel</span>
+              <select id="sheetSelector"></select>
+            </label>
+            <button class="btn btn--primary btn--linreg" id="loadSheetBtn" type="button">Cargar hoja</button>
+          </div>
+
+          <!-- Selector de tabla SQLite (oculto hasta cargar .db) -->
+          <div id="tableSelectorWrap" class="selector-wrap" hidden>
+            <label class="field">
+              <span style="font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.5px;">Tabla SQLite</span>
+              <select id="tableSelector"></select>
+            </label>
+            <button class="btn btn--primary btn--linreg" id="loadTableBtn" type="button">Cargar tabla</button>
+          </div>
+
+          <div class="row-gap" style="margin-top:10px;">
+            <button class="btn btn--ghost" id="loadSampleBtn" type="button">Ejemplo clasificación (clima)</button>
+            <button class="btn btn--ghost" id="loadSampleRegBtn" type="button">Ejemplo regresión (casas)</button>
+          </div>
+        </div>
+
+        <!-- Formulario manual -->
+        <div class="panel">
+          <h2 class="panel__title">Agregar fila manual</h2>
+          <p class="panel__hint" id="manualHint">Define columnas primero (sube un archivo o créalas abajo) para habilitar el formulario.</p>
+          <div id="manualForm" class="manual-form" hidden></div>
+          <button class="btn btn--ghost" id="addColBtn" type="button">+ Definir columnas manualmente</button>
+        </div>
+      </div>
+
+      <!-- Config columnas -->
+      <div class="panel" id="configPanel" hidden>
+        <h2 class="panel__title">Configuración de columnas</h2>
+        <p class="panel__hint">Marca cuál columna es el <strong>objetivo</strong> (lo que quieres predecir). Las demás se tratan como variables de entrada.</p>
+        <div class="col-config" id="colConfig"></div>
+      </div>
+
+      <!-- Tabla de datos -->
+      <div class="panel">
+        <div class="panel__header-row">
+          <h2 class="panel__title">Vista previa de datos</h2>
+          <div class="row-gap">
+            <span class="badge" id="dataBadge">0 filas · 0 columnas</span>
+            <button class="btn btn--danger-ghost" id="clearDataBtn" type="button">Limpiar todo</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="dataTable">
+            <thead><tr><th class="table-empty-th">Sin datos todavía</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- VISTA: RANDOM FOREST ---------- -->
+    <section class="view" id="view-forest" aria-labelledby="forest-heading">
+      <header class="view__header">
+        <div>
+          <p class="eyebrow eyebrow--forest">Paso 2 · Modelo 1</p>
+          <h1 id="forest-heading">Random Forest</h1>
+          <p class="view__desc">Un bosque de árboles de decisión entrenados sobre subconjuntos aleatorios de tus datos. Cada árbol vota y el bosque promedia o elige la mayoría.</p>
+        </div>
+        <div class="header-actions">
+          <label class="field-inline"><span>Nº de árboles</span><input type="number" id="forestTreesInput" min="1" max="200" value="25"></label>
+          <label class="field-inline"><span>Profundidad máx.</span><input type="number" id="forestDepthInput" min="1" max="30" value="8"></label>
+          <button class="btn btn--primary btn--forest" id="trainForestBtn" type="button">Entrenar bosque</button>
+        </div>
+      </header>
+      <div class="grid-2">
+        <div class="panel">
+          <h2 class="panel__title">Visualización del bosque</h2>
+          <div class="viz-wrap" id="forestViz"><p class="viz-empty">Entrena el modelo para ver los árboles generados.</p></div>
+        </div>
+        <div class="panel">
+          <h2 class="panel__title">Métricas</h2>
+          <div class="metrics" id="forestMetrics"><p class="viz-empty">Sin entrenar todavía.</p></div>
+          <h2 class="panel__title panel__title--spaced">Importancia de variables</h2>
+          <div id="forestImportance" class="importance-list"><p class="viz-empty">—</p></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2 class="panel__title">Predicción al momento</h2>
+        <p class="panel__hint">Ingresa nuevos valores y el bosque entrenado te dará una predicción inmediata.</p>
+        <div id="forestPredictForm" class="manual-form"></div>
+        <button class="btn btn--primary btn--forest" id="forestPredictBtn" type="button">Predecir</button>
+        <div class="predict-result" id="forestPredictResult"></div>
+      </div>
+    </section>
+
+    <!-- ---------- VISTA: RED NEURONAL ---------- -->
+    <section class="view" id="view-neuron" aria-labelledby="neuron-heading">
+      <header class="view__header">
+        <div>
+          <p class="eyebrow eyebrow--neuron">Paso 2 · Modelo 2</p>
+          <h1 id="neuron-heading">Red Neuronal</h1>
+          <p class="view__desc">Un perceptrón multicapa (entrada → capa oculta → salida) entrenado por descenso de gradiente sobre tus datos históricos.</p>
+        </div>
+        <div class="header-actions">
+          <label class="field-inline"><span>Neuronas ocultas</span><input type="number" id="nnHiddenInput" min="1" max="64" value="8"></label>
+          <label class="field-inline"><span>Épocas</span><input type="number" id="nnEpochsInput" min="10" max="5000" value="400"></label>
+          <label class="field-inline"><span>Tasa aprendizaje</span><input type="number" id="nnLrInput" min="0.001" max="1" step="0.001" value="0.05"></label>
+          <button class="btn btn--primary btn--neuron" id="trainNnBtn" type="button">Entrenar red</button>
+        </div>
+      </header>
+      <div class="grid-2">
+        <div class="panel">
+          <h2 class="panel__title">Arquitectura</h2>
+          <div class="viz-wrap" id="nnViz"><p class="viz-empty">Entrena el modelo para ver la red activarse.</p></div>
+        </div>
+        <div class="panel">
+          <h2 class="panel__title">Métricas</h2>
+          <div class="metrics" id="nnMetrics"><p class="viz-empty">Sin entrenar todavía.</p></div>
+          <h2 class="panel__title panel__title--spaced">Curva de pérdida</h2>
+          <div class="viz-wrap viz-wrap--short" id="nnLossViz"><p class="viz-empty">—</p></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2 class="panel__title">Predicción al momento</h2>
+        <p class="panel__hint">Ingresa nuevos valores y la red entrenada te dará una predicción inmediata.</p>
+        <div id="nnPredictForm" class="manual-form"></div>
+        <button class="btn btn--primary btn--neuron" id="nnPredictBtn" type="button">Predecir</button>
+        <div class="predict-result" id="nnPredictResult"></div>
+      </div>
+    </section>
+
+    <!-- ---------- VISTA: REGRESIÓN LINEAL ---------- -->
+    <section class="view" id="view-linreg" aria-labelledby="linreg-heading">
+      <header class="view__header">
+        <div>
+          <p class="eyebrow eyebrow--linreg">Paso 2 · Modelo 3</p>
+          <h1 id="linreg-heading">Regresión Lineal</h1>
+          <p class="view__desc">Ajusta una recta (o hiperplano) a tus datos minimizando el error cuadrático. Ideal para entender qué tan bien se explica el objetivo con una relación lineal entre variables.</p>
+        </div>
+        <div class="header-actions">
+          <label class="field-inline"><span>Épocas</span><input type="number" id="lrEpochsInput" min="10" max="10000" value="500"></label>
+          <label class="field-inline"><span>Tasa aprendizaje</span><input type="number" id="lrLrInput" min="0.0001" max="1" step="0.0001" value="0.01"></label>
+          <label class="field-inline"><span>Batch size</span><input type="number" id="lrBatchInput" min="1" max="512" value="16"></label>
+          <button class="btn btn--primary btn--linreg" id="trainLinRegBtn" type="button">Entrenar modelo</button>
+        </div>
+      </header>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h2 class="panel__title">Ecuación ajustada</h2>
+          <div class="viz-wrap linreg-eq-wrap" id="linregEqViz">
+            <p class="viz-empty">Entrena el modelo para ver la ecuación.</p>
+          </div>
+          <h2 class="panel__title panel__title--spaced">Curva de pérdida (MSE)</h2>
+          <div class="viz-wrap viz-wrap--short" id="linregLossViz"><p class="viz-empty">—</p></div>
+        </div>
+        <div class="panel">
+          <h2 class="panel__title">Métricas</h2>
+          <div class="metrics" id="linregMetrics"><p class="viz-empty">Sin entrenar todavía.</p></div>
+          <h2 class="panel__title panel__title--spaced">Coeficientes (pesos del modelo)</h2>
+          <div id="linregCoeffs" class="importance-list"><p class="viz-empty">—</p></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel__title">Predicción al momento</h2>
+        <p class="panel__hint">Ingresa nuevos valores y el modelo lineal te dará una predicción inmediata. Solo funciona con variables de objetivo numéricas.</p>
+        <div id="linregPredictForm" class="manual-form"></div>
+        <button class="btn btn--primary btn--linreg" id="linregPredictBtn" type="button">Predecir</button>
+        <div class="predict-result" id="linregPredictResult"></div>
+      </div>
+    </section>
+
+    <!-- ---------- VISTA: TAREA 1 — PROFE ---------- -->
+    <section class="view" id="view-tarea1" aria-labelledby="tarea1-heading">
+      <header class="view__header">
+        <div>
+          <p class="eyebrow eyebrow--tarea">Tarea 1 · C + SQLite → JS</p>
+          <h1 id="tarea1-heading">Regresión Lineal — Inversiones vs Ventas</h1>
+          <p class="view__desc">Replica exacta de <code>tarea1.c</code> del profe: mínimos cuadrados sobre la tabla <code>reportes</code> de la BD del profe. Carga el archivo <code>inversiones_ventas.db</code>, ingresa una nueva inversión, predice las ventas y guarda el registro.</p>
+        </div>
+        <div class="header-actions">
+          <label class="dropzone-mini" for="dbInputTarea1">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 13V4M10 4L7 7M10 4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 14v2a1 1 0 001 1h12a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span id="dbInputLabel">Cargar <strong>inversiones_ventas.db</strong></span>
+            <input type="file" id="dbInputTarea1" accept=".db,.sqlite,.sqlite3" hidden>
+          </label>
+        </div>
+      </header>
+
+      <!-- Panel principal: tabla de datos + regresión -->
+      <div class="grid-2">
+
+        <!-- Tabla de reportes (igual que el printf del C) -->
+        <div class="panel">
+          <div class="panel__header-row">
+            <h2 class="panel__title">Tabla: reportes</h2>
+            <span class="badge" id="t1RowBadge">0 registros</span>
+          </div>
+          <p class="panel__hint">Datos leídos de la BD del profe — columnas <code>mes · inversion · ventas</code></p>
+          <div class="table-wrap">
+            <table id="t1Table">
+              <thead>
+                <tr>
+                  <th>Mes</th>
+                  <th>Inversión (X)</th>
+                  <th>Ventas (Y)</th>
+                </tr>
+              </thead>
+              <tbody id="t1Tbody">
+                <tr><td colspan="3" class="table-empty-th">Carga la BD para ver los datos</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ecuación y métricas -->
+        <div class="panel">
+          <h2 class="panel__title">Ecuación de la recta</h2>
+          <div class="tarea1-eq" id="t1Ecuacion">
+            <p class="viz-empty">Carga la BD para calcular la regresión.</p>
+          </div>
+
+          <h2 class="panel__title panel__title--spaced">Métricas</h2>
+          <div class="metrics" id="t1Metricas">
+            <p class="viz-empty">—</p>
+          </div>
+
+          <h2 class="panel__title panel__title--spaced">Gráfica (Inversión → Ventas)</h2>
+          <div class="viz-wrap viz-wrap--short" id="t1Grafica">
+            <p class="viz-empty">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel de predicción elástica (PASO 3 + PASO 4 del C) -->
+      <div class="panel" id="t1PredPanel" style="opacity:.45;pointer-events:none;">
+        <h2 class="panel__title">Predicción elástica — Nuevo periodo</h2>
+        <p class="panel__hint">
+          Ingresa la inversión planeada. El sistema calcula las ventas estimadas con
+          <code>y = m·x + b</code> y guarda el registro en la BD (igual que el INSERT del profe).
+        </p>
+
+        <div class="tarea1-form">
+          <div class="field">
+            <label>Nombre del mes</label>
+            <input type="text" id="t1NuevoMes" placeholder="auto: mes N+1" readonly style="color:var(--text-mute);">
+          </div>
+          <div class="field">
+            <label>Inversión a realizar ($)</label>
+            <input type="number" id="t1NuevaInversion" min="0" step="0.01" placeholder="ej. 90">
+          </div>
+          <button class="btn btn--primary btn--tarea" id="t1PredBtn" type="button">
+            Predecir y guardar en BD
+          </button>
+        </div>
+
+        <div id="t1ResultadoWrap" hidden>
+          <div class="tarea1-resultado" id="t1Resultado"></div>
+          <div style="margin-top:14px;">
+            <button class="btn btn--ghost" id="t1DescargarBtn" type="button">
+              ⬇ Descargar BD actualizada (.db)
+            </button>
+            <p class="panel__hint" style="margin-top:8px;">
+              La BD en memoria ya tiene el nuevo registro. Descárgala para usarla de nuevo o entregarla al profe.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- SheetJS para Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- sql.js para SQLite (solo el wrapper; el WASM se carga bajo demanda) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+
+<script src="js/store.js"></script>
+<script src="js/forest.js"></script>
+<script src="js/neuralnet.js"></script>
+<script src="js/linreg.js"></script>
+<script src="js/tarea1.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

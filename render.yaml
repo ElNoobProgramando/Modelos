@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: panel-ml-dashboard
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false
