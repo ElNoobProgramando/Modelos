@@ -17,17 +17,7 @@
   <!-- ===================== SIDEBAR ===================== -->
   <aside class="sidebar">
     <div class="brand">
-      <svg class="brand__mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle cx="16" cy="6" r="3" fill="currentColor"/>
-        <circle cx="6" cy="16" r="3" fill="currentColor" opacity="0.55"/>
-        <circle cx="26" cy="16" r="3" fill="currentColor" opacity="0.55"/>
-        <circle cx="16" cy="26" r="3" fill="currentColor" opacity="0.3"/>
-        <path d="M16 9V23M16 9L8 14M16 9L24 14M16 23L8 18M16 23L24 18" stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
-      </svg>
-      <div>
-        <p class="brand__title">Panel&nbsp;ML</p>
-        <p class="brand__sub">datos&nbsp;→&nbsp;modelo&nbsp;→&nbsp;decisión</p>
-      </div>
+   
     </div>
 
     <nav class="nav" aria-label="Modelos">
@@ -49,7 +39,7 @@
       </button>
       <button class="nav__item" data-view="tarea1" type="button">
         <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        <span>Tarea 1 — Profe</span>
+        <span>Tarea 1</span>
         <span class="nav__tag nav__tag--tarea">inversiones</span>
       </button>
     </nav>
@@ -63,9 +53,6 @@
       </button>
     </nav>
 
-    <div class="sidebar__footer">
-      <p>Todo corre en tu navegador.<br>Ningún dato sale de tu equipo.</p>
-    </div>
   </aside>
 
   <!-- ===================== MAIN ===================== -->
@@ -75,7 +62,6 @@
     <section class="view is-active" id="view-data" aria-labelledby="data-heading">
       <header class="view__header">
         <div>
-          <p class="eyebrow">Paso 1</p>
           <h1 id="data-heading">Conjunto de datos histórico</h1>
           <p class="view__desc">Carga tus datos desde CSV, Excel (.xlsx/.xls) o SQLite (.db), o escribe filas a mano. Define qué columna quieres predecir (objetivo). El mismo conjunto alimenta los tres modelos.</p>
         </div>
@@ -160,9 +146,7 @@
     <section class="view" id="view-forest" aria-labelledby="forest-heading">
       <header class="view__header">
         <div>
-          <p class="eyebrow eyebrow--forest">Paso 2 · Modelo 1</p>
           <h1 id="forest-heading">Random Forest</h1>
-          <p class="view__desc">Un bosque de árboles de decisión entrenados sobre subconjuntos aleatorios de tus datos. Cada árbol vota y el bosque promedia o elige la mayoría.</p>
         </div>
         <div class="header-actions">
           <label class="field-inline"><span>Nº de árboles</span><input type="number" id="forestTreesInput" min="1" max="200" value="25"></label>
@@ -195,7 +179,6 @@
     <section class="view" id="view-neuron" aria-labelledby="neuron-heading">
       <header class="view__header">
         <div>
-          <p class="eyebrow eyebrow--neuron">Paso 2 · Modelo 2</p>
           <h1 id="neuron-heading">Red Neuronal</h1>
           <p class="view__desc">Un perceptrón multicapa (entrada → capa oculta → salida) entrenado por descenso de gradiente sobre tus datos históricos.</p>
         </div>
@@ -231,7 +214,6 @@
     <section class="view" id="view-linreg" aria-labelledby="linreg-heading">
       <header class="view__header">
         <div>
-          <p class="eyebrow eyebrow--linreg">Paso 2 · Modelo 3</p>
           <h1 id="linreg-heading">Regresión Lineal</h1>
           <p class="view__desc">Ajusta una recta (o hiperplano) a tus datos minimizando el error cuadrático. Ideal para entender qué tan bien se explica el objetivo con una relación lineal entre variables.</p>
         </div>
@@ -262,7 +244,6 @@
 
       <div class="panel">
         <h2 class="panel__title">Predicción al momento</h2>
-        <p class="panel__hint">Ingresa nuevos valores y el modelo lineal te dará una predicción inmediata. Solo funciona con variables de objetivo numéricas.</p>
         <div id="linregPredictForm" class="manual-form"></div>
         <button class="btn btn--primary btn--linreg" id="linregPredictBtn" type="button">Predecir</button>
         <div class="predict-result" id="linregPredictResult"></div>
@@ -273,9 +254,7 @@
     <section class="view" id="view-tarea1" aria-labelledby="tarea1-heading">
       <header class="view__header">
         <div>
-          <p class="eyebrow eyebrow--tarea">Tarea 1 · C + SQLite → JS</p>
           <h1 id="tarea1-heading">Regresión Lineal — Inversiones vs Ventas</h1>
-          <p class="view__desc">Replica exacta de <code>tarea1.c</code> del profe: mínimos cuadrados sobre la tabla <code>reportes</code> de la BD del profe. Carga el archivo <code>inversiones_ventas.db</code>, ingresa una nueva inversión, predice las ventas y guarda el registro.</p>
         </div>
         <div class="header-actions">
           <label class="dropzone-mini" for="dbInputTarea1">
@@ -295,7 +274,6 @@
             <h2 class="panel__title">Tabla: reportes</h2>
             <span class="badge" id="t1RowBadge">0 registros</span>
           </div>
-          <p class="panel__hint">Datos leídos de la BD del profe — columnas <code>mes · inversion · ventas</code></p>
           <div class="table-wrap">
             <table id="t1Table">
               <thead>
@@ -331,12 +309,11 @@
         </div>
       </div>
 
-      <!-- Panel de predicción elástica (PASO 3 + PASO 4 del C) -->
       <div class="panel" id="t1PredPanel" style="opacity:.45;pointer-events:none;">
         <h2 class="panel__title">Predicción elástica — Nuevo periodo</h2>
         <p class="panel__hint">
           Ingresa la inversión planeada. El sistema calcula las ventas estimadas con
-          <code>y = m·x + b</code> y guarda el registro en la BD (igual que el INSERT del profe).
+          <code>y = m·x + b</code> y guarda el registro en la BD.
         </p>
 
         <div class="tarea1-form">
